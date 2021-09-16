@@ -492,16 +492,14 @@ void handleRtype(const char* bits)
 		}
 		case 100001: //ADDU
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)];	
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)];
+			break;
 		}
 		case 100100: //AND
 		{
-			if(CURRENT_STATE.REGS[binToDec(rt)] && CURRENT_STATE.REGS[binToDec(rs)])
-			{
-				CURRENT_STATE.REGS[binToDec(rd)] = 1;
-				break;
-			}
-			CURRENT_STATE.REGS[binToDec(rd)] = 0;
+			
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] & CURRENT_STATE.REGS[binToDec(rs)];
+			break;
 
 		}
 		case 001000: //JR
@@ -510,15 +508,22 @@ void handleRtype(const char* bits)
 		}
 		case 100111: //NOR
 		{
-			
+			CURRENT_STATE.REGS[binToDec(rd)] = ~CURRENT_STATE.REGS[binToDec(rt)] ^ ~CURRENT_STATE.REGS[binToDec(rs)];
+			break;
 		}
 		case 100101: //OR
 		{
-			
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] | CURRENT_STATE.REGS[binToDec(rs)];
+			break;
 		}
 		case 101010: //SLT
 		{
-			
+			if(CURRENT_STATE.REGS[binToDec(rs)] < CURRENT_STATE.REGS[binToDec(rt)])
+			{
+				CURRENT_STATE.REGS[binToDec(rd)] = 1;
+				break;
+			}
+			CURRENT_STATE.REGS[binToDec(rd)] = 0;
 		}
 		case 000000: //SLL
 		{
