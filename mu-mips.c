@@ -526,22 +526,33 @@ void handleRtype(const char* bits)
 				break;
 			}
 			CURRENT_STATE.REGS[binToDec(rd)] = 0;
+			break;
 		}
 		case 000000: //SLL
 		{
 			CURRENT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] << binToDec(shamt)); 	
+			break;
 		}
 		case 000010: //SRL
 		{
 			CURRENT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
+			break;
 		}
 		case 100010: //SUB
 		{
-			
+			int temp = 0;
+			temp = CURRENT_STATE.REGS[binToDec(rs)] - CURRENT_STATE.REGS[binToDec(rt)];
+			if(temp < 0x80000000)
+			{ 
+				break;
+			}
+			CURRENT_STATE.REGS[binToDec(rd)] = temp;
+			break;
 		}
 		case 100011: //SUBU	
 		{
-			
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] - CURRENT_STATE.REGS[binToDec(rt)];
+			break;
 		}
 		case 011000: //MULT
 		{
