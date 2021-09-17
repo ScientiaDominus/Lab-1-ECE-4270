@@ -458,6 +458,8 @@ void handleItype(const char* bits)
 	}
 
 }
+//This function handles all R-type instructions using an input binary string and decoding that into integers with the use of the
+//binToDec() function. This function deconstructs the binary string into its different components and allows those to be 
 void handleRtype(const char* bits)
 {
 	char rs[6] = {};
@@ -527,11 +529,11 @@ void handleRtype(const char* bits)
 		}
 		case 000000: //SLL
 		{
-			
+			CURRENT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] << binToDec(shamt)); 	
 		}
 		case 000010: //SRL
 		{
-			
+			CURRENT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
 		}
 		case 100010: //SUB
 		{
