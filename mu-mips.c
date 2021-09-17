@@ -376,7 +376,7 @@ const char* binaryMips(uint32_t input)
 	printf("%s", hexString); //test for the correct string 
 	for(i = 0; i < 8; i++) //convert the hex into binary values
 	{
-		switch (hexString[i])
+		switch (hexString[i]) //check the character and convert to a 4-bit binary representation.
 		{
 			case '0':
 				strcat(binString, "0000");
@@ -446,7 +446,7 @@ int instFormat(const char* opcode)
 	type = 1;
 	return type;
 }
-void handleItype(const char* bits)
+/*void handleItype(const char* bits)
 {
 	char rs[6] = {};
 	char rt[6] = {};
@@ -457,9 +457,9 @@ void handleItype(const char* bits)
 		rt[i] = bits[i+11];
 	}
 
-}
+}*/
 //This function handles all R-type instructions using an input binary string and decoding that into integers with the use of the
-//binToDec() function. This function deconstructs the binary string into its different components and allows those to be 
+//binToDec() function. This function deconstructs the binary string into its different components and allows those to be interpreted accordingly
 void handleRtype(const char* bits)
 {
 	char rs[6] = {};
@@ -484,12 +484,12 @@ void handleRtype(const char* bits)
 	{
 		case 100000: //ADD 
 		{
-			temp = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)];	
+			temp = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)];	//add the values within the registers together
 			if(temp >= 0x7FFFFFFF)
 			{
-				break;
+				break; //if the value is greater than the maximum possible value then do not place the value into the desitination register
 			}
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)];
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)]; //otherwise complete the summation and store in the destination register
 			break;
 		}
 		case 100001: //ADDU
