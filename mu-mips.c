@@ -556,7 +556,7 @@ void handleRtype(const char* bits)
 		}
 		case 011000: //MULT
 		{
-			
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
 		}
 		case 101001: //MULTU
 		{
