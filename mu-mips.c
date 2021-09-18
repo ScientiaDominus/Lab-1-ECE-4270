@@ -351,7 +351,11 @@ int main(int argc, char *argv[]) {
 	printf("Welcome to MU-MIPS SIM...\n");
 	printf("**************************\n\n");
 	uint32_t hex = 0xFFFFFFFF;
-	printf("%s", binaryMips(hex));
+	const char *hexinst = binaryMips(hex);
+	printf("\n%s\n", hexinst);
+	hex = 0x3C031000;
+	hexinst = binaryMips(hex);
+	printf("\n%s\n", hexinst);
 	if (argc < 2) {
 		printf("Error: You should provide input file.\nUsage: %s <input program> \n\n",  argv[0]);
 		exit(1);
@@ -364,14 +368,16 @@ int main(int argc, char *argv[]) {
 	while (1){
 		handle_command();
 	}
+	free((char *)hexinst);
 	return 0;
 }
 const char* binaryMips(uint32_t input)
 {
-	char hexString[9] = {}; //create a string to store the hexadecimal form
-	static char binString[33] = {}; //a string to contain the binary representation
+	char hexString[10] = {}; //create a string to store the hexadecimal form
+	char *binString;
+	binString = (char *)malloc(33*sizeof(char)); //a string to contain the binary representation
 	int i = 0;
-	printf("%X", input);
+	printf("\n%X\n", input);
 	sprintf(hexString, "%X", input); //store the hex into the string
 	printf("%s", hexString); //test for the correct string 
 	for(i = 0; i < 8; i++) //convert the hex into binary values
@@ -428,7 +434,6 @@ const char* binaryMips(uint32_t input)
 				break;
 		}
 	}
-
 	return binString;
 }
 /*const char* instMips(char *input)
@@ -467,7 +472,7 @@ void handleRtype(const char* bits)
 	char rd[6] = {};
 	char shamt[6] = {};
 	char funct[7] = {};
-	int temp = 0, inst = 0, opcode = 0;
+	int temp = 0, opcode = 0;
 	for(int i = 0; i < 6; i++)
 	{
 		rs[i] = bits[i+6];
