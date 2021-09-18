@@ -494,33 +494,33 @@ void handleRtype(const char* bits)
 		}
 		case 100001: //ADDU
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)];
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)]; //add the values without an overflow exepction to be processed.
 			break;
 		}
 		case 100100: //AND
 		{
 			
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] & CURRENT_STATE.REGS[binToDec(rs)];
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] & CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise and operator compare the two values and store their result in the desitination register
 			break;
 
 		}
 		case 001000: //JR
 		{
-			//Need to implement J-type instructions before we implement this. 
+			//Need to implement J-type format instructions before we implement this. 
 		}
 		case 100111: //NOR
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = ~CURRENT_STATE.REGS[binToDec(rt)] ^ ~CURRENT_STATE.REGS[binToDec(rs)];
+			CURRENT_STATE.REGS[binToDec(rd)] = ~CURRENT_STATE.REGS[binToDec(rt)] | ~CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise nor operator to compare the two registers and store their result in the destination register
 			break;
 		}
 		case 100101: //OR
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] | CURRENT_STATE.REGS[binToDec(rs)];
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] | CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise or operation compare the two registers and store the result into the destination register. 
 			break;
 		}
 		case 101010: //SLT
 		{
-			if(CURRENT_STATE.REGS[binToDec(rs)] < CURRENT_STATE.REGS[binToDec(rt)])
+			if(CURRENT_STATE.REGS[binToDec(rs)] < CURRENT_STATE.REGS[binToDec(rt)]) //compare the registers. if rs is less than rt than store 1 in rd. otherwise store a 0 in rd.
 			{
 				CURRENT_STATE.REGS[binToDec(rd)] = 1;
 				break;
@@ -530,16 +530,18 @@ void handleRtype(const char* bits)
 		}
 		case 000000: //SLL
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] << binToDec(shamt)); 	
+			CURRENT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] << binToDec(shamt)); 	//shift register by a specified number of bits and store the result in the desition register
 			break;
 		}
 		case 000010: //SRL
 		{
+			//shift the register to the right by the specified shift amount and store that in the destination register.
 			CURRENT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
 			break;
 		}
 		case 100010: //SUB
 		{
+			//functions similary to add, find the difference between the two values and store the result in the destination register. Check for overflow.
 			int temp = 0;
 			temp = CURRENT_STATE.REGS[binToDec(rs)] - CURRENT_STATE.REGS[binToDec(rt)];
 			if(temp < 0x80000000)
@@ -551,32 +553,39 @@ void handleRtype(const char* bits)
 		}
 		case 100011: //SUBU	
 		{
+			//subtract the two values. do not check for overflow.
 			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] - CURRENT_STATE.REGS[binToDec(rt)];
 			break;
 		}
 		case 011000: //MULT
-		{
+		{ //update this function to properly multiply unsigned values.
 			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
+			break;
 		}
 		case 101001: //MULTU
 		{
-			
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
+			break;
 		}
 		case 011010: //DIV
-		{
-			
+		{ //update this function to properly divide signed values.
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] / CURRENT_STATE.REGS[binToDec(rt)];
+			break;
 		}
 		case 011011: //DIVU 
 		{
-			
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] / CURRENT_STATE.REGS[binToDec(rt)];
+			break;
 		}
 		case 100110: //XOR
 		{
-			
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] ^ CURRENT_STATE.REGS[binToDec(rs)];
+			break;
 		}
 		case 000011: //SRA
 		{
-			
+			CURRENT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
+			break;
 		}
 		case 010000: //MFHI
 		{
