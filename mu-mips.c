@@ -559,21 +559,25 @@ void handleRtype(const char* bits)
 		}
 		case 011000: //MULT
 		{ //update this function to properly multiply unsigned values.
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
+			//update this function to properly store values in the HI and LO registers.
+			CURRENT_STATE.HI = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
 			break;
 		}
 		case 101001: //MULTU
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
+			//update this function to properly store values in the HI and LO registers.
+			CURRENT_STATE.LO = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
 			break;
 		}
 		case 011010: //DIV
 		{ //update this function to properly divide signed values.
+			//update this function to properly store values in the HI and LO registers.
 			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] / CURRENT_STATE.REGS[binToDec(rt)];
 			break;
 		}
 		case 011011: //DIVU 
 		{
+			//update this function to properly store values in the HI and LO registers.
 			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] / CURRENT_STATE.REGS[binToDec(rt)];
 			break;
 		}
@@ -589,19 +593,27 @@ void handleRtype(const char* bits)
 		}
 		case 010000: //MFHI
 		{
-			
+			//update this function to properly store values in the HI and LO registers.
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.HI;
+			break;
 		}
 		case 010010: //MFLO
 		{
-			
+			//update this function to properly store values in the HI and LO registers.
+			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.LO;
+			break;
 		}
 		case 010001: //MTHI
 		{
-			
+			//update this function to properly store values in the HI and LO registers.
+			CURRENT_STATE.HI = CURRENT_STATE.REGS[binToDec(rs)];
+			break;
 		}
 		case 010011: //MTLO
 		{
-			
+			//update this function to properly store values in the HI and LO registers.
+			CURRENT_STATE.LO = CURRENT_STATE.REGS[binToDec(rs)];
+			break;
 		}
 		case 001001: //JALR
 		{
