@@ -489,6 +489,7 @@ void handleRtype(const char* bits)
 	{
 		case 100000: //ADD 
 		{
+			//rewrite this function to properly use signed values instead of unsigned values. Should be pretty easy.
 			temp = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)];	//add the values within the registers together
 			if(temp >= 0x7FFFFFFF)
 			{
@@ -557,6 +558,7 @@ void handleRtype(const char* bits)
 		case 100010: //SUB
 		{
 			//functions similary to add, find the difference between the two values and store the result in the destination register. Check for overflow.
+			//rewrite this function to properly use signed values instead of unsigned values. Should be pretty easy. 
 			int temp = 0;
 			temp = CURRENT_STATE.REGS[binToDec(rs)] - CURRENT_STATE.REGS[binToDec(rt)];
 			if(temp < 0x80000000)
@@ -578,14 +580,18 @@ void handleRtype(const char* bits)
 		case 011000: //MULT
 		{ //update this function to properly multiply unsigned values.
 			//update this function to properly store values in the HI and LO registers.
-			NEXT_STATE.HI = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
+			int64_t temp = (int64_t)(int32_t)CURRENT_STATE.REGS[binToDec(rs)] * (int64_t)(int32_t)CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.HI = (uint32_t)((temp>>32) & 0xFFFFFFFF);
+			NEXT_STATE.LO = (uint32_t)(temp & 0xFFFFFFFF);
 			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 101001: //MULTU
 		{
 			//update this function to properly store values in the HI and LO registers.
-			NEXT_STATE.LO = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
+			uint64_t tempu = (uint64_t)CURRENT_STATE.REGS[binToDec(rs)] * (uint64_t)CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.HI = (uint32_t)((tempu>>32) & 0xFFFFFFFF);
+			NEXT_STATE.LO = (uint32_t)(tempu & 0xFFFFFFFF);
 			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
