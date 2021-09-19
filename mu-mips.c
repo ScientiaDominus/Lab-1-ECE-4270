@@ -645,13 +645,15 @@ void handleRtype(const char* bits)
 		}
 		case 001001: //JALR
 		{
-			if(binToDec(rd) <= 0 || binToDec(rd) >= 32)
+			if(binToDec(rd) <= 0 || binToDec(rd) >= 32) //check that the destination register is not specified or is in a non-editable register ($zero)
 			{
-				NEXT_STATE.REGS[31] = CURRENT_STATE.PC+4;
-				NEXT_STATE.PC = CURRENT_STATE.REGS[binToDec(rs)];
+				NEXT_STATE.REGS[31] = CURRENT_STATE.PC+4; //store the next instructions address into the return address register ($ra)
+				NEXT_STATE.PC = CURRENT_STATE.REGS[binToDec(rs)]; //store the address of the jump location into the next state of the program counter.
+				break;
 			}
-			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.PC+4;
-			NEXT_STATE.PC = CURRENT_STATE.REGS[binToDec(rs)];
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.PC+4; //store the next instruction's address into the specified register
+			NEXT_STATE.PC = CURRENT_STATE.REGS[binToDec(rs)]; //set the program counter to the address of the jumped to instruction.
+			break;
 		}
 		default:
 			printf("Error: An I-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
@@ -659,15 +661,17 @@ void handleRtype(const char* bits)
 	}
 
 }
+/* converts a 5 bit string into decimal for use within functions 
+*/
 int binToDec(const char* bits)
 {
-	int i = 0;
+	int i = 0; 
 	int result = 0;
-	for(i = 0; i < 5; i++)
+	for(i = 0; i < 5; i++) //iterate through each character of the string
 	{
 		if(bits[i] == '1')
 		{
-			result += pow(2, (4-i));
+			result += pow(2, (4-i)); //add the value of each place raised to the proper value. i.e. the first digit is added as 2 raised to the 0th power and the third digit is added as 2 raised to the 2nd power
 		}
 	}
 	return result; 
