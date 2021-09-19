@@ -492,20 +492,24 @@ void handleRtype(const char* bits)
 			temp = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)];	//add the values within the registers together
 			if(temp >= 0x7FFFFFFF)
 			{
+				NEXT_STATE.PC = CURRENT_STATE.PC+4;
 				break; //if the value is greater than the maximum possible value then do not place the value into the desitination register
 			}
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)]; //otherwise complete the summation and store in the destination register
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)]; //otherwise complete the summation and store in the destination register
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;//increment the program counter to the next memory address containing an instruction.
 			break;
 		}
 		case 100001: //ADDU
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)]; //add the values without an overflow exepction to be processed.
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)]; //add the values without an overflow exepction to be processed.
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 100100: //AND
 		{
 			
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] & CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise and operator compare the two values and store their result in the desitination register
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] & CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise and operator compare the two values and store their result in the desitination register
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 
 		}
@@ -515,33 +519,39 @@ void handleRtype(const char* bits)
 		}
 		case 100111: //NOR
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = ~CURRENT_STATE.REGS[binToDec(rt)] | ~CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise nor operator to compare the two registers and store their result in the destination register
+			NEXT_STATE.REGS[binToDec(rd)] = ~CURRENT_STATE.REGS[binToDec(rt)] | ~CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise nor operator to compare the two registers and store their result in the destination register
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 100101: //OR
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] | CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise or operation compare the two registers and store the result into the destination register. 
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] | CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise or operation compare the two registers and store the result into the destination register. 
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 101010: //SLT
 		{
 			if(CURRENT_STATE.REGS[binToDec(rs)] < CURRENT_STATE.REGS[binToDec(rt)]) //compare the registers. if rs is less than rt than store 1 in rd. otherwise store a 0 in rd.
 			{
-				CURRENT_STATE.REGS[binToDec(rd)] = 1;
+				NEXT_STATE.REGS[binToDec(rd)] = 1;
+				NEXT_STATE.PC = CURRENT_STATE.PC+4;
 				break;
 			}
-			CURRENT_STATE.REGS[binToDec(rd)] = 0;
+			NEXT_STATE.REGS[binToDec(rd)] = 0;
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 000000: //SLL
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] << binToDec(shamt)); 	//shift register by a specified number of bits and store the result in the desition register
+			NEXT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] << binToDec(shamt)); 	//shift register by a specified number of bits and store the result in the desition register
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 000010: //SRL
 		{
 			//shift the register to the right by the specified shift amount and store that in the destination register.
-			CURRENT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
+			NEXT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 100010: //SUB
@@ -551,81 +561,101 @@ void handleRtype(const char* bits)
 			temp = CURRENT_STATE.REGS[binToDec(rs)] - CURRENT_STATE.REGS[binToDec(rt)];
 			if(temp < 0x80000000)
 			{ 
+				NEXT_STATE.PC = CURRENT_STATE.PC+4;
 				break;
 			}
-			CURRENT_STATE.REGS[binToDec(rd)] = temp;
+			NEXT_STATE.REGS[binToDec(rd)] = temp;
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 100011: //SUBU	
 		{
 			//subtract the two values. do not check for overflow.
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] - CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] - CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 011000: //MULT
 		{ //update this function to properly multiply unsigned values.
 			//update this function to properly store values in the HI and LO registers.
-			CURRENT_STATE.HI = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.HI = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 101001: //MULTU
 		{
 			//update this function to properly store values in the HI and LO registers.
-			CURRENT_STATE.LO = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.LO = CURRENT_STATE.REGS[binToDec(rs)] * CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 011010: //DIV
 		{ //update this function to properly divide signed values.
 			//update this function to properly store values in the HI and LO registers.
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] / CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] / CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 011011: //DIVU 
 		{
 			//update this function to properly store values in the HI and LO registers.
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] / CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] / CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 100110: //XOR
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] ^ CURRENT_STATE.REGS[binToDec(rs)];
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] ^ CURRENT_STATE.REGS[binToDec(rs)];
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 000011: //SRA
 		{
-			CURRENT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
+			NEXT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 010000: //MFHI
 		{
 			//update this function to properly store values in the HI and LO registers.
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.HI;
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.HI;
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 010010: //MFLO
 		{
 			//update this function to properly store values in the HI and LO registers.
-			CURRENT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.LO;
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.LO;
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 010001: //MTHI
 		{
 			//update this function to properly store values in the HI and LO registers.
-			CURRENT_STATE.HI = CURRENT_STATE.REGS[binToDec(rs)];
+			NEXT_STATE.HI = CURRENT_STATE.REGS[binToDec(rs)];
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 010011: //MTLO
 		{
 			//update this function to properly store values in the HI and LO registers.
-			CURRENT_STATE.LO = CURRENT_STATE.REGS[binToDec(rs)];
+			NEXT_STATE.LO = CURRENT_STATE.REGS[binToDec(rs)];
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 			break;
 		}
 		case 001001: //JALR
 		{
-			
+			if(binToDec(rd) <= 0 || binToDec(rd) >= 32)
+			{
+				NEXT_STATE.REGS[31] = CURRENT_STATE.PC+4;
+				NEXT_STATE.PC = CURRENT_STATE.REGS[binToDec(rs)];
+			}
+			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.PC+4;
+			NEXT_STATE.PC = CURRENT_STATE.REGS[binToDec(rs)];
 		}
 		default:
 			printf("Error: An I-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
+			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 	}
 
 }
