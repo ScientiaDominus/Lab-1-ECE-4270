@@ -306,7 +306,26 @@ void load_program() {
 /************************************************************/
 void handle_instruction()
 {
-			
+	char* inst;
+	inst = (char *)malloc(33*sizeof(char));
+	inst = (char *)binaryMips(mem_read_32(CURRENT_STATE.PC));
+	char temp[7] = {};
+	if(atoi(inst)==0)
+	{
+		RUN_FLAG = FALSE;
+	}
+	for(int i = 0; i < 7; i++)
+	{
+		temp[i] = inst[i];
+	}
+	if(instFormat(temp) == 0)
+	{
+		handleRtype(inst);
+	}
+	free(inst);
+	//else 
+	//	handleItype(inst);
+	NEXT_STATE.PC = CURRENT_STATE.PC+4;		
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
 }
@@ -350,12 +369,12 @@ int main(int argc, char *argv[]) {
 	printf("\n**************************\n");
 	printf("Welcome to MU-MIPS SIM...\n");
 	printf("**************************\n\n");
-	uint32_t hex = 0xFFFFFFFF;
+	/*uint32_t hex = 0xFFFFFFFF;
 	const char *hexinst = binaryMips(hex);
 	printf("\n%s\n", hexinst);
 	hex = 0x3C031000;
 	hexinst = binaryMips(hex);
-	printf("\n%s\n", hexinst);
+	printf("\n%s\n", hexinst);*/
 	if (argc < 2) {
 		printf("Error: You should provide input file.\nUsage: %s <input program> \n\n",  argv[0]);
 		exit(1);
@@ -368,18 +387,20 @@ int main(int argc, char *argv[]) {
 	while (1){
 		handle_command();
 	}
-	free((char *)hexinst);
+	//free((char *)hexinst);
 	return 0;
 }
+//this function is now working. Previously values resulted in a buffer overflow but that issue has been resolved. 
 const char* binaryMips(uint32_t input)
 {
 	char hexString[10] = {}; //create a string to store the hexadecimal form
 	char *binString;
 	binString = (char *)malloc(33*sizeof(char)); //a string to contain the binary representation
 	int i = 0;
-	printf("\n%X\n", input);
-	sprintf(hexString, "%X", input); //store the hex into the string
-	printf("%s", hexString); //test for the correct string 
+	//printf("\n%X\n", input);
+	//printf("Hey jude\n");
+	//sprintf(hexString, "%X", input); //store the hex into the string
+	//printf("%s", hexString); //test for the correct string 
 	for(i = 0; i < 8; i++) //convert the hex into binary values
 	{
 		switch (hexString[i]) //check the character and convert to a 4-bit binary representation.
@@ -472,7 +493,8 @@ void handleRtype(const char* bits)
 	char rd[6] = {};
 	char shamt[6] = {};
 	char funct[7] = {};
-	int temp = 0, opcode = 0;
+	int64_t temp = 0;
+	int opcode = 0;
 	for(int i = 0; i < 6; i++)
 	{
 		rs[i] = bits[i+6];
@@ -490,27 +512,27 @@ void handleRtype(const char* bits)
 		case 100000: //ADD 
 		{
 			//rewrite this function to properly use signed values instead of unsigned values. Should be pretty easy.
-			temp = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)];	//add the values within the registers together
+			temp = (int32_t)CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)CURRENT_STATE.REGS[binToDec(rt)];	//add the values within the registers together
 			if(temp >= 0x7FFFFFFF)
 			{
 				NEXT_STATE.PC = CURRENT_STATE.PC+4;
 				break; //if the value is greater than the maximum possible value then do not place the value into the desitination register
 			}
-			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)]; //otherwise complete the summation and store in the destination register
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;//increment the program counter to the next memory address containing an instruction.
+			NEXT_STATE.REGS[binToDec(rd)] = (int32_t)CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)CURRENT_STATE.REGS[binToDec(rt)]; //otherwise complete the summation and store in the destination register
+			
 			break;
 		}
 		case 100001: //ADDU
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)]; //add the values without an overflow exepction to be processed.
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 100100: //AND
 		{
 			
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] & CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise and operator compare the two values and store their result in the desitination register
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 
 		}
@@ -521,13 +543,13 @@ void handleRtype(const char* bits)
 		case 100111: //NOR
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = ~CURRENT_STATE.REGS[binToDec(rt)] | ~CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise nor operator to compare the two registers and store their result in the destination register
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 100101: //OR
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] | CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise or operation compare the two registers and store the result into the destination register. 
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 101010: //SLT
@@ -535,24 +557,24 @@ void handleRtype(const char* bits)
 			if(CURRENT_STATE.REGS[binToDec(rs)] < CURRENT_STATE.REGS[binToDec(rt)]) //compare the registers. if rs is less than rt than store 1 in rd. otherwise store a 0 in rd.
 			{
 				NEXT_STATE.REGS[binToDec(rd)] = 1;
-				NEXT_STATE.PC = CURRENT_STATE.PC+4;
+				
 				break;
 			}
 			NEXT_STATE.REGS[binToDec(rd)] = 0;
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 000000: //SLL
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] << binToDec(shamt)); 	//shift register by a specified number of bits and store the result in the desition register
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 000010: //SRL
 		{
 			//shift the register to the right by the specified shift amount and store that in the destination register.
 			NEXT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 100010: //SUB
@@ -563,18 +585,18 @@ void handleRtype(const char* bits)
 			temp = CURRENT_STATE.REGS[binToDec(rs)] - CURRENT_STATE.REGS[binToDec(rt)];
 			if(temp < 0x80000000)
 			{ 
-				NEXT_STATE.PC = CURRENT_STATE.PC+4;
+				
 				break;
 			}
 			NEXT_STATE.REGS[binToDec(rd)] = temp;
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 100011: //SUBU	
 		{
 			//subtract the two values. do not check for overflow.
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] - CURRENT_STATE.REGS[binToDec(rt)];
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 011000: //MULT
@@ -583,7 +605,7 @@ void handleRtype(const char* bits)
 			int64_t temp = (int64_t)(int32_t)CURRENT_STATE.REGS[binToDec(rs)] * (int64_t)(int32_t)CURRENT_STATE.REGS[binToDec(rt)];
 			NEXT_STATE.HI = (uint32_t)((temp>>32) & 0xFFFFFFFF);
 			NEXT_STATE.LO = (uint32_t)(temp & 0xFFFFFFFF);
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 101001: //MULTU
@@ -592,61 +614,65 @@ void handleRtype(const char* bits)
 			uint64_t tempu = (uint64_t)CURRENT_STATE.REGS[binToDec(rs)] * (uint64_t)CURRENT_STATE.REGS[binToDec(rt)];
 			NEXT_STATE.HI = (uint32_t)((tempu>>32) & 0xFFFFFFFF);
 			NEXT_STATE.LO = (uint32_t)(tempu & 0xFFFFFFFF);
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 011010: //DIV
 		{ //update this function to properly divide signed values.
 			//update this function to properly store values in the HI and LO registers.
-			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] / CURRENT_STATE.REGS[binToDec(rt)];
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			int64_t temp = (int64_t)(int32_t)CURRENT_STATE.REGS[binToDec(rs)] / (int64_t)(int32_t)CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.HI = (uint32_t)((temp>>32) & 0xFFFFFFFF);
+			NEXT_STATE.LO = (uint32_t)(temp & 0xFFFFFFFF);
+			
 			break;
 		}
 		case 011011: //DIVU 
 		{
 			//update this function to properly store values in the HI and LO registers.
-			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] / CURRENT_STATE.REGS[binToDec(rt)];
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			uint64_t tempu = (uint64_t)CURRENT_STATE.REGS[binToDec(rs)] * (uint64_t)CURRENT_STATE.REGS[binToDec(rt)];
+			NEXT_STATE.HI = (uint32_t)((tempu>>32) & 0xFFFFFFFF);
+			NEXT_STATE.LO = (uint32_t)(tempu & 0xFFFFFFFF);
+			
 			break;
 		}
 		case 100110: //XOR
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] ^ CURRENT_STATE.REGS[binToDec(rs)];
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 000011: //SRA
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 010000: //MFHI
 		{
 			//update this function to properly store values in the HI and LO registers.
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.HI;
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 010010: //MFLO
 		{
 			//update this function to properly store values in the HI and LO registers.
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.LO;
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 010001: //MTHI
 		{
 			//update this function to properly store values in the HI and LO registers.
 			NEXT_STATE.HI = CURRENT_STATE.REGS[binToDec(rs)];
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 010011: //MTLO
 		{
 			//update this function to properly store values in the HI and LO registers.
 			NEXT_STATE.LO = CURRENT_STATE.REGS[binToDec(rs)];
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
+			
 			break;
 		}
 		case 001001: //JALR
@@ -663,7 +689,6 @@ void handleRtype(const char* bits)
 		}
 		default:
 			printf("Error: An I-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
-			NEXT_STATE.PC = CURRENT_STATE.PC+4;
 	}
 
 }
