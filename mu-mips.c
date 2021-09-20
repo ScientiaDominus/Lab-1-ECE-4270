@@ -1058,6 +1058,8 @@ const char* iTypeString(const char* bits)
 	char rs[6] = {};
 	char rt[6] = {};
 	char imm[17] = {};
+	char* result;
+	result = (char *)malloc(33*sizeof(char));
 	for(int i = 0; i < 16; i++)
 	{
 		if(i < 7)
@@ -1076,7 +1078,12 @@ const char* iTypeString(const char* bits)
 		{
 			case 001000: //ADDI
 			{
-
+				strcat(result, "ADDI ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, )
+				return result;
 			}
 			case 001001: //ADDIU
 			{
@@ -1148,7 +1155,7 @@ const char* iTypeString(const char* bits)
 			}
 			case 000011: //JAL
 			{
-				
+
 			}
 			default: 
 				printf("Error: An R-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
