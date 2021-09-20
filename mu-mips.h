@@ -88,4 +88,6 @@ void handleRtype(const char*);
 int instFind(int format, int opcode);
 int binToDec(const char*);
 int longBinToDec(const char*);
+const char* rTypeString(const char*);
+const char* iTypeString(const char*);
 

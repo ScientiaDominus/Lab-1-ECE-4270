@@ -360,8 +360,24 @@ void print_program(){
 /************************************************************/
 /* Print the instruction at given memory address (in MIPS assembly format)    */
 /************************************************************/
-void print_instruction(uint32_t addr){
-	/*IMPLEMENT THIS*/
+void print_instruction(uint32_t addr)
+{
+	char* inst;
+	inst = (char *)malloc(33*sizeof(char));
+	inst = binaryMips(addr);
+	char temp[7] = {};
+	for(int i = 0; i < 7; i++)
+	{
+		temp[i] = inst[i];
+	}
+	if(instFormat(temp) == 0)
+	{
+		rTypeString(inst);
+	}
+	iTypeString(inst);
+
+
+
 }
 
 /***************************************************************/
@@ -809,6 +825,14 @@ int longBinToDec(const char* bits) //Used to convert the immediate values into a
 		}
 	}
 	return result;
+}
+const char* rTypeString(const char* bits)
+{
+	
+}
+const char* iTypeString(const char* bits)
+{
+	
 }
 /*int instFind(int format, int opcode)
 {
