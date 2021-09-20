@@ -793,6 +793,15 @@ void handleRtype(const char* bits)
 			NEXT_STATE.PC = CURRENT_STATE.REGS[binToDec(rs)]; //set the program counter to the address of the jumped to instruction.
 			break;
 		}
+		case 001100: //SYSCALL
+		{
+			if(CURRENT_STATE.REGS[2] == 0xA)
+			{
+				RUN_FLAG = FALSE;
+				break;
+			}
+		}
+
 		default:
 			printf("Error: An I-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
 	}
