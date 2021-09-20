@@ -559,15 +559,40 @@ void handleItype(const char* bits)
 				break;
 			}
 			case 100011: //LW
-				return 35;
+			{
+				int32_t temp = 0;
+				temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
+				NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp);
+				break;
+			}
 			case 100000: //LB
-				return 32;
+			{
+				int32_t temp = 0;
+				temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
+				NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp) >> 24;
+				break;
+			}
 			case 100001: //LH
-				return 33;
+			{
+				int32_t temp = 0;
+				temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
+				NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp) >> 16;
+				break;
+			}
 			case 001111: //LUI
-				return 15;
+			{
+				int32_t temp = 0;
+				temp = ((int32_t)longBinToDec(imm)) << 16;
+				NEXT_STATE.REGS[binToDec(rt)] = temp;
+				break;
+			}
 			case 101011: //SW
-				return 43;
+			{
+				uint32_t temp = 0;
+				temp = CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)((int16_t)longBinToDec(imm));
+				mem_write_32(temp, CURRENT_STATE.REGS[binToDec(rt)]);
+				break;
+			}
 			case 101000: //SB
 				return 40;
 			case 101001: //SH
@@ -1067,6 +1092,7 @@ const char* iTypeString(const char* bits)
 	char rs[6] = {};
 	char rt[6] = {};
 	char imm[17] = {};
+	char hex[11] = {};
 	char* result;
 	result = (char *)malloc(33*sizeof(char));
 	for(int i = 0; i < 16; i++)
@@ -1091,7 +1117,8 @@ const char* iTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				strcat(result, ", ");
 				strcat(result, decToReg(binToDec(rs)));
-				strcat(result, )
+				sprintf(hex, "0x%X", longBinToDec(imm));
+				strcat(result, hex);
 				return result;
 			}
 			case 001001: //ADDIU
