@@ -417,7 +417,7 @@ const char* binaryMips(uint32_t input)
 	int i = 0;
 	//printf("\n%X\n", input);
 	//printf("Hey jude\n");
-	//sprintf(hexString, "%X", input); //store the hex into the string
+	sprintf(hexString, "%X", input); //store the hex into the string
 	//printf("%s", hexString); //test for the correct string 
 	for(i = 0; i < 8; i++) //convert the hex into binary values
 	{
@@ -828,11 +828,347 @@ int longBinToDec(const char* bits) //Used to convert the immediate values into a
 }
 const char* rTypeString(const char* bits)
 {
-	
+	char rs[6] = {};
+	char rt[6] = {};
+	char rd[6] = {};
+	char shamt[6] = {};
+	char funct[7] = {};
+	char saInt[4] = {};
+	char* result;
+	result = (char *)malloc(33*sizeof(char));
+	int64_t temp = 0;
+	int opcode = 0;
+	for(int i = 0; i < 6; i++)
+	{
+		rs[i] = bits[i+6];
+		rt[i] = bits[i+11];
+		rd[i] = bits[i+16];
+		shamt[i] = bits[i+21];
+	}
+	for(int i = 0; i < 7; i++)
+	{
+		funct[i] = bits[i+26];
+	}
+	sprintf(saInt,"%d", binToDec(shamt));
+	opcode = atoi(funct);
+	switch(opcode)
+		{
+			case 100000: //ADD 
+			{	
+				strcat(result, "ADD ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 100001: //ADDU
+			{
+				strcat(result, "ADDU ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 100100: //AND
+			{
+				strcat(result, "AND ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 001000: //JR
+			{			
+				strcat(result, "JR ");
+				strcat(result, decToReg(binToDec(rs)));
+				return result;
+			}			
+			case 100111: //NOR
+			{
+				strcat(result, "NOR ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 100101: //OR
+			{
+				strcat(result, "OR ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 101010: //SLT
+			{
+				strcat(result, "SLT ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 000000: //SLL
+			{
+				strcat(result, "SLL ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				strcat(result, saInt);
+				return result;
+			}
+			case 000010: //SRL
+			{
+				strcat(result, "SRL ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				strcat(result, saInt);
+				return result;
+			}
+			case 100010: //SUB
+			{
+				strcat(result, "SUB ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 100011: //SUBU	
+			{
+				strcat(result, "SUBU ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 011000: //MULT
+			{
+				strcat(result, "MULT ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 101001: //MULTU
+			{
+				strcat(result, "MULTU ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 011010: //DIV
+			{
+				strcat(result, "DIV ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 011011: //DIVU 
+			{
+				strcat(result, "DIVU ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 100110: //XOR
+			{
+				strcat(result, "XOR ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 000011: //SRA
+			{
+				strcat(result, "SRA ");
+				strcat(result, decToReg(binToDec(rd)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				return result;
+			}
+			case 010000: //MFHI
+			{
+				strcat(result, "MFHI ");
+				strcat(result, decToReg(binToDec(rd)));
+				return result;
+			}
+			case 010010: //MFLO
+			{
+				strcat(result, "MFLO ");
+				strcat(result, decToReg(binToDec(rd)));
+				return result;
+			}
+			case 010001: //MTHI
+			{
+				strcat(result, "MTHI ");
+				strcat(result, decToReg(binToDec(rs)));
+				return result;
+			}
+			case 010011: //MTLO
+			{
+				strcat(result, "MTLO ");
+				strcat(result, decToReg(binToDec(rs)));
+				return result;
+			}
+			case 001001: //JALR
+			{
+				strcat(result, "JALR ");
+				if(binToDec(rd) != 0)
+				{
+					strcat(result, decToReg(binToDec(rd)));
+					strcat(result, ", ");
+				}
+				strcat(result, decToReg(binToDec(rs)));
+				return result;
+			}
+			default:
+				printf("Error: An I-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
+				return "**ERROR INSTRUCTION NOT FOUND**";
+		}
 }
 const char* iTypeString(const char* bits)
 {
-	
+	switch(opcode)
+		{
+			case 001000: //ADDI
+				return 8;
+			case 001001: //ADDIU
+				return 9;
+			case 001100: //ANDI
+				return 12;
+			case 001101: //ORI
+				return 13;
+			case 001110: //XORI
+				return 14;
+			case 001010: //SLTI
+				return 10;
+			case 100011: //LW
+				return 35;
+			case 100000: //LB
+				return 32;
+			case 100001: //LH
+				return 33;
+			case 001111: //LUI
+				return 15;
+			case 101011: //SW
+				return 43;
+			case 101000: //SB
+				return 40;
+			case 101001: //SH
+				return 41;
+			case 000100: //BEQ
+				return 4;
+			case 000101: //BNE
+				return 5;
+			case 000110: //BLEZ
+				return 6;
+			case 000111: //BGTZ
+				return 7;
+			case 000010: //J
+				return 2;
+			case 000011: //JAL
+				return 3;
+			default: 
+				printf("Error: An R-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
+				return 1000;
+		}	
+}
+const char* decToReg(int value)
+{
+	switch(value)
+	{
+		case 0:
+			return "$zero";
+		case 1:
+			return "$at";
+		case 2:
+			return "$v0";
+		case 3:
+			return "$v1";
+		case 4:
+			return "$a0";
+		case 5:
+			return "$a1";
+		case 6:
+			return "$a2";
+		case 7:
+			return "$a3";
+		case 8:
+			return "$t0";
+		case 9:
+			return "$t1";
+		case 10:
+			return "$t2";
+		case 11:
+			return "$t3";
+		case 12:
+			return "$t4";
+		case 13:
+			return "$t5";
+		case 14:
+			return "$t6";
+		case 15:
+			return "$t7";
+		case 16:
+			return "$s0";
+		case 17:
+			return "$s1";
+		case 18:
+			return "$s2";
+		case 19:	
+			return "$s3";
+		case 20:
+			return "$s4";
+		case 21:
+			return "$s5";
+		case 22:
+			return "$s6";
+		case 23:
+			return "$s7";
+		case 24:
+			return "$t8";
+		case 25:
+			return "$t9";
+		case 26:
+			return "$k0";
+		case 27:
+			return "$k1";
+		case 28:
+			return "$gp";
+		case 29:
+			return "$sp";
+		case 30:
+			return "$sp";
+		case 31:
+			return "$fp";
+		default:
+			return "NULL";
+	}
 }
 /*int instFind(int format, int opcode)
 {
