@@ -1053,46 +1053,103 @@ const char* rTypeString(const char* bits)
 }
 const char* iTypeString(const char* bits)
 {
+	int opcode = 0;
+	char op[7] = {};
+	char rs[6] = {};
+	char rt[6] = {};
+	char imm[17] = {};
+	for(int i = 0; i < 16; i++)
+	{
+		if(i < 7)
+		{
+			op[i] = bits[i]; //convert the opcode into a string.
+			if(i < 6)
+			{ 
+				rs[i] = bits[i+6]; //convert rs and rt into strings for editing later
+				rt[i] = bits[i+11];
+			}
+		}
+		imm[i] = bits[i+16]; //convert the immediate address into a string.
+	}
+	opcode = atoi(op);
 	switch(opcode)
 		{
 			case 001000: //ADDI
-				return 8;
+			{
+
+			}
 			case 001001: //ADDIU
-				return 9;
+			{
+
+			}
 			case 001100: //ANDI
-				return 12;
+			{
+
+			}
 			case 001101: //ORI
-				return 13;
+			{
+
+			}
 			case 001110: //XORI
-				return 14;
+			{
+
+			}
 			case 001010: //SLTI
-				return 10;
+			{
+
+			}
 			case 100011: //LW
-				return 35;
+			{
+
+			}
 			case 100000: //LB
-				return 32;
+			{
+
+			}
 			case 100001: //LH
-				return 33;
+			{
+
+			}
 			case 001111: //LUI
-				return 15;
+			{
+
+			}
 			case 101011: //SW
-				return 43;
+			{
+
+			}
 			case 101000: //SB
-				return 40;
+			{
+
+			}
 			case 101001: //SH
-				return 41;
+			{
+
+			}
 			case 000100: //BEQ
-				return 4;
+			{
+
+			}
 			case 000101: //BNE
-				return 5;
+			{
+
+			}
 			case 000110: //BLEZ
-				return 6;
+			{
+
+			}
 			case 000111: //BGTZ
-				return 7;
+			{
+
+			}
 			case 000010: //J
-				return 2;
+			{
+
+			}
 			case 000011: //JAL
-				return 3;
+			{
+				
+			}
 			default: 
 				printf("Error: An R-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
 				return 1000;
