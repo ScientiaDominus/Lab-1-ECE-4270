@@ -322,10 +322,12 @@ void handle_instruction()
 	{
 		handleRtype(inst);
 	}
+	handleItype(inst);
 	free(inst);
-	//else 
-	//	handleItype(inst);
-	NEXT_STATE.PC = CURRENT_STATE.PC+4;		
+	if(NEXT_STATE.PC == CURRENT_STATE.PC)
+	{
+		NEXT_STATE.PC = CURRENT_STATE.PC+4;		
+	}
 	/*IMPLEMENT THIS*/
 	/* execute one instruction at a time. Use/update CURRENT_STATE and and NEXT_STATE, as necessary.*/
 }
@@ -472,18 +474,89 @@ int instFormat(const char* opcode)
 	type = 1;
 	return type;
 }
-/*void handleItype(const char* bits)
+void handleItype(const char* bits)
 {
+	int opcode = 0;
+	char op[7] = {};
 	char rs[6] = {};
 	char rt[6] = {};
-	char imm[16] = {};
-	for(int i = 0; i < 6; i++)
+	char imm[17] = {};
+	/*for(int i = 0; i < 6; i++)
 	{
 		rs[i] = bits[i+6];
 		rt[i] = bits[i+11];
 	}
+	for(int i = 0; i < 7; i++)
+	{
+		op[i] = bits[i];
+	
+	}*/
+	for(int i = 0; i < 16; i++)
+	{
+		if(i < 7)
+		{
+			op[i] = bits[i]; //convert the opcode into a string.
+			if(i < 6)
+			{ 
+				rs[i] = bits[i+6]; //convert rs and rt into strings for editing later
+				rt[i] = bits[i+11];
+			}
+		}
+		imm[i] = bits[i+16]; //convert the immediate address into a string.
+	}
+	opcode = atoi(op);
+	switch(opcode)
+		{
+			case 001000: //ADDI
+			{
+				NEXT_STATE.REGS[binToDec(rt)] = (int32_t)CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)longBinToDec(imm);
+				break;
+			}
+			case 001001: //ADDIU
+			{
+				NEXT_STATE.REGS[binToDec(rt)] = (uint32_t)CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)longBinToDec(imm);
+				break;
+			}
+			case 001100: //ANDI
+				
+			case 001101: //ORI
+				return 13;
+			case 001110: //XORI
+				return 14;
+			case 001010: //SLTI
+				return 10;
+			case 100011: //LW
+				return 35;
+			case 100000: //LB
+				return 32;
+			case 100001: //LH
+				return 33;
+			case 001111: //LUI
+				return 15;
+			case 101011: //SW
+				return 43;
+			case 101000: //SB
+				return 40;
+			case 101001: //SH
+				return 41;
+			case 000100: //BEQ
+				return 4;
+			case 000101: //BNE
+				return 5;
+			case 000110: //BLEZ
+				return 6;
+			case 000111: //BGTZ
+				return 7;
+			case 000010: //J
+				return 2;
+			case 000011: //JAL
+				return 3;
+			default: 
+				printf("Error: An R-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
+				return 1000;
+		}
 
-}*/
+}
 //This function handles all R-type instructions using an input binary string and decoding that into integers with the use of the
 //binToDec() function. This function deconstructs the binary string into its different components and allows those to be interpreted accordingly
 void handleRtype(const char* bits)
@@ -706,6 +779,19 @@ int binToDec(const char* bits)
 		}
 	}
 	return result; 
+}
+int longBinToDec(const char* bits) //Used to convert the immediate values into a number that can be added to the registers
+{
+	int i = 0; 
+	int result = 0;
+	for(i = 0; i < 16; i++) //iterate through each character of the string
+	{
+		if(bits[i] == '1')
+		{
+			result += pow(2, (15-i)); //add the value of each place raised to the proper value. i.e. the first digit is added as 2 raised to the 0th power and the third digit is added as 2 raised to the 2nd power
+		}
+	}
+	return result;
 }
 /*int instFind(int format, int opcode)
 {
