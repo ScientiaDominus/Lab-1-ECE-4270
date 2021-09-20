@@ -514,17 +514,34 @@ void handleItype(const char* bits)
 			}
 			case 001001: //ADDIU
 			{
-				NEXT_STATE.REGS[binToDec(rt)] = (uint32_t)CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)longBinToDec(imm);
+				NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)longBinToDec(imm);
 				break;
 			}
 			case 001100: //ANDI
-				
+			{
+				NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] & (uint32_t)longBinToDec(imm);
+				break;
+			}
 			case 001101: //ORI
-				return 13;
+			{
+				NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] | (uint32_t)longBinToDec(imm);
+				break;
+			}
 			case 001110: //XORI
-				return 14;
+			{
+				NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] ^ (uint32_t)longBinToDec(imm);
+				break;
+			}
 			case 001010: //SLTI
-				return 10;
+			{
+				if(CURRENT_STATE.REGS[binToDec(rs)] < (uint32_t)longBinToDec(imm)) //compare the registers. if rs is less than rt than store 1 in rd. otherwise store a 0 in rd.
+				{
+					NEXT_STATE.REGS[binToDec(rt)] = 1;
+					break;
+				}
+				NEXT_STATE.REGS[binToDec(rt)] = 0;
+				break;
+			}
 			case 100011: //LW
 				return 35;
 			case 100000: //LB
