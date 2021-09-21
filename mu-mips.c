@@ -559,17 +559,46 @@ void handleItype(const char* bits)
 				break;
 			}
 			case 100011: //LW
-				return 35;
+			{
+				int32_t temp = 0;
+				temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
+				NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp);
+				break;
+			}
 			case 100000: //LB
-				return 32;
+			{
+				int32_t temp = 0;
+				temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
+				NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp) >> 24;
+				break;
+			}
 			case 100001: //LH
-				return 33;
+			{
+				int32_t temp = 0;
+				temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
+				NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp) >> 16;
+				break;
+			}
 			case 001111: //LUI
-				return 15;
+			{
+				int32_t temp = 0;
+				temp = ((int32_t)longBinToDec(imm)) << 16;
+				NEXT_STATE.REGS[binToDec(rt)] = temp;
+				break;
+			}
 			case 101011: //SW
-				return 43;
+			{
+				uint32_t temp = 0;
+				temp = CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)((int16_t)longBinToDec(imm));
+				mem_write_32(temp, CURRENT_STATE.REGS[binToDec(rt)]);
+				break;
+			}
 			case 101000: //SB
-				return 40;
+			{				
+				NEXT_STATE.REGS[binToDec(rs)] =  CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)((int16_t)longBinToDec(imm));
+				mem_write_32(NEXT_STATE.REGS[binToDec(rs)], CURRENT_STATE.REGS[binToDec(rt)] & 0x000000FF);
+				break;
+			}
 			case 101001: //SH
 				return 41;
 			case 000100: //BEQ
