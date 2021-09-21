@@ -1244,8 +1244,8 @@ const char* iTypeString(const char* bits)
 				strcat(result, "LW ");
 				strcat(result, decToReg(binToDec(rt)));
 				strcat(result, ", ");
-				sprintf(hex, "%d(", longBinToDec(imm));
-				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				sprintf(hex, "%d(%s)", longBinToDec(imm), decToReg(binToDec(rs)));
+				//sprintf(hex, "%s)", decToReg(binToDec(rs)));
 				strcat(result, hex);
 				return result;
 			}
@@ -1254,8 +1254,8 @@ const char* iTypeString(const char* bits)
 				strcat(result, "LB ");
 				strcat(result, decToReg(binToDec(rt)));
 				strcat(result, ", ");
-				sprintf(hex, "%d(", longBinToDec(imm));
-				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				sprintf(hex, "%d(%s)", longBinToDec(imm), decToReg(binToDec(rs)));
+				//sprintf(hex, "%s)", decToReg(binToDec(rs)));
 				strcat(result, hex);
 				return result;
 			}
@@ -1264,8 +1264,8 @@ const char* iTypeString(const char* bits)
 				strcat(result, "LH ");
 				strcat(result, decToReg(binToDec(rt)));
 				strcat(result, ", ");
-				sprintf(hex, "%d(", longBinToDec(imm));
-				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				sprintf(hex, "%d(%s)", longBinToDec(imm), decToReg(binToDec(rs)));
+				//sprintf(hex, "%s)", decToReg(binToDec(rs)));
 				strcat(result, hex);
 				return result;
 			}
@@ -1283,8 +1283,8 @@ const char* iTypeString(const char* bits)
 				strcat(result, "SW ");
 				strcat(result, decToReg(binToDec(rt)));
 				strcat(result, ", ");
-				sprintf(hex, "%d(", longBinToDec(imm));
-				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				sprintf(hex, "%d(%s)", longBinToDec(imm), decToReg(binToDec(rs)));
+				//sprintf(hex, "%s)", decToReg(binToDec(rs)));
 				strcat(result, hex);
 				return result;
 			}
@@ -1293,8 +1293,8 @@ const char* iTypeString(const char* bits)
 				strcat(result, "SB ");
 				strcat(result, decToReg(binToDec(rt)));
 				strcat(result, ", ");
-				sprintf(hex, "%d(", longBinToDec(imm));
-				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				sprintf(hex, "%d(%s)", longBinToDec(imm), decToReg(binToDec(rs)));
+				//sprintf(hex, "%s)", decToReg(binToDec(rs)));
 				strcat(result, hex);
 				return result;
 			}
@@ -1303,8 +1303,8 @@ const char* iTypeString(const char* bits)
 				strcat(result, "SH ");
 				strcat(result, decToReg(binToDec(rt)));
 				strcat(result, ", ");
-				sprintf(hex, "%d(", longBinToDec(imm));
-				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				sprintf(hex, "%d(%s)", longBinToDec(imm), decToReg(binToDec(rs)));
+				//sprintf(hex, "%s)", decToReg(binToDec(rs)));
 				strcat(result, hex);
 				return result;
 			}
