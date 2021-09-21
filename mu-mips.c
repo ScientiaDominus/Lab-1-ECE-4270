@@ -322,7 +322,10 @@ void handle_instruction()
 	{
 		handleRtype(inst);
 	}
-	handleItype(inst);
+	else
+	{
+		handleItype(inst);
+	}
 	free(inst);
 	if(NEXT_STATE.PC == CURRENT_STATE.PC)
 	{
@@ -364,17 +367,25 @@ void print_instruction(uint32_t addr)
 {
 	char* inst;
 	inst = (char *)malloc(33*sizeof(char));
-	inst = binaryMips(addr);
+	inst = (char *)binaryMips(mem_read_32(addr));
 	char temp[7] = {};
-	for(int i = 0; i < 7; i++)
+	for(int i = 0; i < 6; i++)
 	{
-		temp[i] = inst[i];
+		if(i < 6)
+		{
+			temp[i] = inst[i];
+		}
 	}
 	if(instFormat(temp) == 0)
 	{
-		rTypeString(inst);
+		//printf("R-type instruction\n");
+		printf("%s\n", rTypeString(inst));
 	}
-	iTypeString(inst);
+	else
+	{
+		//printf("I-type instruction\n");
+		printf("%s\n", iTypeString(inst));
+	}
 
 
 
@@ -482,7 +493,8 @@ const char* binaryMips(uint32_t input)
 int instFormat(const char* opcode)
 {
 	int type = 0;
-	if(strcmp(opcode, "000000") == 0)
+	//printf("OPCODE IS %s\n", opcode);
+	if(strcmp(opcode, "000000\0") == 0)
 	{
 		type = 0; //R type instructions
 		return type;
@@ -509,10 +521,10 @@ void handleItype(const char* bits)
 	}*/
 	for(int i = 0; i < 16; i++)
 	{
-		if(i < 7)
+		if(i < 6)
 		{
 			op[i] = bits[i]; //convert the opcode into a string.
-			if(i < 6)
+			if(i < 5)
 			{ 
 				rs[i] = bits[i+6]; //convert rs and rt into strings for editing later
 				rt[i] = bits[i+11];
@@ -593,6 +605,7 @@ void handleItype(const char* bits)
 				mem_write_32(temp, CURRENT_STATE.REGS[binToDec(rt)]);
 				break;
 			}
+			/*
 			case 101000: //SB
 				return 40;
 			case 101001: //SH
@@ -612,6 +625,7 @@ void handleItype(const char* bits)
 			default: 
 				printf("Error: An R-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
 				return 1000;
+			*/
 		}
 
 }
@@ -626,21 +640,21 @@ void handleRtype(const char* bits)
 	char funct[7] = {};
 	int64_t temp = 0;
 	int opcode = 0;
-	for(int i = 0; i < 6; i++)
+	for(int i = 0; i < 5; i++)
 	{
 		rs[i] = bits[i+6];
 		rt[i] = bits[i+11];
 		rd[i] = bits[i+16];
 		shamt[i] = bits[i+21];
 	}
-	for(int i = 0; i < 7; i++)
+	for(int i = 0; i < 6; i++)
 	{
 		funct[i] = bits[i+26];
 	}
-	opcode = atoi(funct);
+	opcode = longBinToDec(funct);
 	switch(opcode)
 	{
-		case 100000: //ADD 
+		case 32: //ADD 
 		{
 			//rewrite this function to properly use signed values instead of unsigned values. Should be pretty easy.
 			temp = (int32_t)CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)CURRENT_STATE.REGS[binToDec(rt)];	//add the values within the registers together
@@ -653,13 +667,13 @@ void handleRtype(const char* bits)
 			
 			break;
 		}
-		case 100001: //ADDU
+		case 33: //ADDU
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] + CURRENT_STATE.REGS[binToDec(rt)]; //add the values without an overflow exepction to be processed.
 			
 			break;
 		}
-		case 100100: //AND
+		case 36: //AND
 		{
 			
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] & CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise and operator compare the two values and store their result in the desitination register
@@ -667,23 +681,26 @@ void handleRtype(const char* bits)
 			break;
 
 		}
-		case 001000: //JR
+		case 8: //JR
 		{
 			//Need to implement J-type format instructions before we implement this. 
+			NEXT_STATE.REGS[31] = CURRENT_STATE.PC+4;
+			NEXT_STATE.PC = CURRENT_STATE.REGS[binToDec(rs)];
+			break;
 		}
-		case 100111: //NOR
+		case 39: //NOR
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = ~CURRENT_STATE.REGS[binToDec(rt)] | ~CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise nor operator to compare the two registers and store their result in the destination register
 			
 			break;
 		}
-		case 100101: //OR
+		case 37: //OR
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] | CURRENT_STATE.REGS[binToDec(rs)]; //using the bitwise or operation compare the two registers and store the result into the destination register. 
 			
 			break;
 		}
-		case 101010: //SLT
+		case 42: //SLT
 		{
 			if(CURRENT_STATE.REGS[binToDec(rs)] < CURRENT_STATE.REGS[binToDec(rt)]) //compare the registers. if rs is less than rt than store 1 in rd. otherwise store a 0 in rd.
 			{
@@ -695,20 +712,20 @@ void handleRtype(const char* bits)
 			
 			break;
 		}
-		case 000000: //SLL
+		case 0: //SLL
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] << binToDec(shamt)); 	//shift register by a specified number of bits and store the result in the desition register
 			
 			break;
 		}
-		case 000010: //SRL
+		case 2: //SRL
 		{
 			//shift the register to the right by the specified shift amount and store that in the destination register.
 			NEXT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
 			
 			break;
 		}
-		case 100010: //SUB
+		case 34: //SUB
 		{
 			//functions similary to add, find the difference between the two values and store the result in the destination register. Check for overflow.
 			//rewrite this function to properly use signed values instead of unsigned values. Should be pretty easy. 
@@ -723,14 +740,14 @@ void handleRtype(const char* bits)
 			
 			break;
 		}
-		case 100011: //SUBU	
+		case 35: //SUBU	
 		{
 			//subtract the two values. do not check for overflow.
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rs)] - CURRENT_STATE.REGS[binToDec(rt)];
 			
 			break;
 		}
-		case 011000: //MULT
+		case 24: //MULT
 		{ //update this function to properly multiply unsigned values.
 			//update this function to properly store values in the HI and LO registers.
 			int64_t temp = (int64_t)(int32_t)CURRENT_STATE.REGS[binToDec(rs)] * (int64_t)(int32_t)CURRENT_STATE.REGS[binToDec(rt)];
@@ -739,7 +756,7 @@ void handleRtype(const char* bits)
 			
 			break;
 		}
-		case 101001: //MULTU
+		case 25: //MULTU
 		{
 			//update this function to properly store values in the HI and LO registers.
 			uint64_t tempu = (uint64_t)CURRENT_STATE.REGS[binToDec(rs)] * (uint64_t)CURRENT_STATE.REGS[binToDec(rt)];
@@ -748,7 +765,7 @@ void handleRtype(const char* bits)
 			
 			break;
 		}
-		case 011010: //DIV
+		case 26: //DIV
 		{ //update this function to properly divide signed values.
 			//update this function to properly store values in the HI and LO registers.
 			int64_t temp = (int64_t)(int32_t)CURRENT_STATE.REGS[binToDec(rs)] / (int64_t)(int32_t)CURRENT_STATE.REGS[binToDec(rt)];
@@ -757,7 +774,7 @@ void handleRtype(const char* bits)
 			
 			break;
 		}
-		case 011011: //DIVU 
+		case 27: //DIVU 
 		{
 			//update this function to properly store values in the HI and LO registers.
 			uint64_t tempu = (uint64_t)CURRENT_STATE.REGS[binToDec(rs)] * (uint64_t)CURRENT_STATE.REGS[binToDec(rt)];
@@ -766,47 +783,47 @@ void handleRtype(const char* bits)
 			
 			break;
 		}
-		case 100110: //XOR
+		case 38: //XOR
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.REGS[binToDec(rt)] ^ CURRENT_STATE.REGS[binToDec(rs)];
 			
 			break;
 		}
-		case 000011: //SRA
+		case 3: //SRA
 		{
 			NEXT_STATE.REGS[binToDec(rd)] = (CURRENT_STATE.REGS[binToDec(rt)] >> binToDec(shamt)); 
 			
 			break;
 		}
-		case 010000: //MFHI
+		case 16: //MFHI
 		{
 			//update this function to properly store values in the HI and LO registers.
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.HI;
 			
 			break;
 		}
-		case 010010: //MFLO
+		case 18: //MFLO
 		{
 			//update this function to properly store values in the HI and LO registers.
 			NEXT_STATE.REGS[binToDec(rd)] = CURRENT_STATE.LO;
 			
 			break;
 		}
-		case 010001: //MTHI
+		case 17: //MTHI
 		{
 			//update this function to properly store values in the HI and LO registers.
 			NEXT_STATE.HI = CURRENT_STATE.REGS[binToDec(rs)];
 			
 			break;
 		}
-		case 010011: //MTLO
+		case 19: //MTLO
 		{
 			//update this function to properly store values in the HI and LO registers.
 			NEXT_STATE.LO = CURRENT_STATE.REGS[binToDec(rs)];
 			
 			break;
 		}
-		case 001001: //JALR
+		case 9: //JALR
 		{
 			if(binToDec(rd) <= 0 || binToDec(rd) >= 32) //check that the destination register is not specified or is in a non-editable register ($zero)
 			{
@@ -818,7 +835,7 @@ void handleRtype(const char* bits)
 			NEXT_STATE.PC = CURRENT_STATE.REGS[binToDec(rs)]; //set the program counter to the address of the jumped to instruction.
 			break;
 		}
-		case 001100: //SYSCALL
+		case 12: //SYSCALL
 		{
 			if(CURRENT_STATE.REGS[2] == 0xA)
 			{
@@ -851,11 +868,13 @@ int longBinToDec(const char* bits) //Used to convert the immediate values into a
 {
 	int i = 0; 
 	int result = 0;
-	for(i = 0; i < 16; i++) //iterate through each character of the string
+	int size = 0;
+	size = strlen(bits);
+	for(i = 0; i < size; i++) //iterate through each character of the string
 	{
 		if(bits[i] == '1')
 		{
-			result += pow(2, (15-i)); //add the value of each place raised to the proper value. i.e. the first digit is added as 2 raised to the 0th power and the third digit is added as 2 raised to the 2nd power
+			result += pow(2, ((size - 1)-i)); //add the value of each place raised to the proper value. i.e. the first digit is added as 2 raised to the 0th power and the third digit is added as 2 raised to the 2nd power
 		}
 	}
 	return result;
@@ -870,7 +889,7 @@ const char* rTypeString(const char* bits)
 	char saInt[4] = {};
 	char* result;
 	result = (char *)malloc(33*sizeof(char));
-	int64_t temp = 0;
+	//int64_t temp = 0;
 	int opcode = 0;
 	for(int i = 0; i < 6; i++)
 	{
@@ -884,10 +903,10 @@ const char* rTypeString(const char* bits)
 		funct[i] = bits[i+26];
 	}
 	sprintf(saInt,"%d", binToDec(shamt));
-	opcode = atoi(funct);
+	opcode = longBinToDec(funct);
 	switch(opcode)
 		{
-			case 100000: //ADD 
+			case 32: //ADD 
 			{	
 				strcat(result, "ADD ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -897,7 +916,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 100001: //ADDU
+			case 33: //ADDU
 			{
 				strcat(result, "ADDU ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -907,7 +926,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 100100: //AND
+			case 36: //AND
 			{
 				strcat(result, "AND ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -917,13 +936,13 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 001000: //JR
+			case 8: //JR
 			{			
 				strcat(result, "JR ");
 				strcat(result, decToReg(binToDec(rs)));
 				return result;
 			}			
-			case 100111: //NOR
+			case 39: //NOR
 			{
 				strcat(result, "NOR ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -933,7 +952,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 100101: //OR
+			case 37: //OR
 			{
 				strcat(result, "OR ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -943,7 +962,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 101010: //SLT
+			case 42: //SLT
 			{
 				strcat(result, "SLT ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -953,7 +972,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 000000: //SLL
+			case 0: //SLL
 			{
 				strcat(result, "SLL ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -963,7 +982,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, saInt);
 				return result;
 			}
-			case 000010: //SRL
+			case 2: //SRL
 			{
 				strcat(result, "SRL ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -973,7 +992,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, saInt);
 				return result;
 			}
-			case 100010: //SUB
+			case 34: //SUB
 			{
 				strcat(result, "SUB ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -983,7 +1002,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 100011: //SUBU	
+			case 35: //SUBU	
 			{
 				strcat(result, "SUBU ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -993,7 +1012,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 011000: //MULT
+			case 24: //MULT
 			{
 				strcat(result, "MULT ");
 				strcat(result, decToReg(binToDec(rs)));
@@ -1001,7 +1020,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 101001: //MULTU
+			case 41: //MULTU
 			{
 				strcat(result, "MULTU ");
 				strcat(result, decToReg(binToDec(rs)));
@@ -1009,7 +1028,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 011010: //DIV
+			case 26: //DIV
 			{
 				strcat(result, "DIV ");
 				strcat(result, decToReg(binToDec(rs)));
@@ -1017,7 +1036,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 011011: //DIVU 
+			case 27: //DIVU 
 			{
 				strcat(result, "DIVU ");
 				strcat(result, decToReg(binToDec(rs)));
@@ -1025,7 +1044,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 100110: //XOR
+			case 38: //XOR
 			{
 				strcat(result, "XOR ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -1035,7 +1054,7 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 000011: //SRA
+			case 3: //SRA
 			{
 				strcat(result, "SRA ");
 				strcat(result, decToReg(binToDec(rd)));
@@ -1045,31 +1064,31 @@ const char* rTypeString(const char* bits)
 				strcat(result, decToReg(binToDec(rt)));
 				return result;
 			}
-			case 010000: //MFHI
+			case 16: //MFHI
 			{
 				strcat(result, "MFHI ");
 				strcat(result, decToReg(binToDec(rd)));
 				return result;
 			}
-			case 010010: //MFLO
+			case 18: //MFLO
 			{
 				strcat(result, "MFLO ");
 				strcat(result, decToReg(binToDec(rd)));
 				return result;
 			}
-			case 010001: //MTHI
+			case 17: //MTHI
 			{
 				strcat(result, "MTHI ");
 				strcat(result, decToReg(binToDec(rs)));
 				return result;
 			}
-			case 010011: //MTLO
+			case 19: //MTLO
 			{
 				strcat(result, "MTLO ");
 				strcat(result, decToReg(binToDec(rs)));
 				return result;
 			}
-			case 001001: //JALR
+			case 9: //JALR
 			{
 				strcat(result, "JALR ");
 				if(binToDec(rd) != 0)
@@ -1079,6 +1098,10 @@ const char* rTypeString(const char* bits)
 				}
 				strcat(result, decToReg(binToDec(rs)));
 				return result;
+			}
+			case 12:
+			{
+				return "SYSCALL";
 			}
 			default:
 				printf("Error: An I-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
@@ -1093,109 +1116,221 @@ const char* iTypeString(const char* bits)
 	char rt[6] = {};
 	char imm[17] = {};
 	char hex[11] = {};
+	char target[27] = {};
 	char* result;
 	result = (char *)malloc(33*sizeof(char));
-	for(int i = 0; i < 16; i++)
+	for(int i = 0; i < 26; i++)
 	{
-		if(i < 7)
+		target[i] = bits[i+6]; //convert the immediate address into a string.
+		if(i < 16)
 		{
-			op[i] = bits[i]; //convert the opcode into a string.
+			imm[i] = bits[i+16]; //convert the immediate address into a string.
 			if(i < 6)
-			{ 
-				rs[i] = bits[i+6]; //convert rs and rt into strings for editing later
-				rt[i] = bits[i+11];
+			{
+				op[i] = bits[i]; //convert the opcode into a string.
+				if(i < 5)
+				{ 
+					rs[i] = bits[i+6]; //convert rs and rt into strings for editing later
+					rt[i] = bits[i+11];
+				}
 			}
 		}
-		imm[i] = bits[i+16]; //convert the immediate address into a string.
 	}
-	opcode = atoi(op);
+	opcode = longBinToDec(op);
+	//printf("\n%d\n",opcode);
 	switch(opcode)
 		{
-			case 001000: //ADDI
+			case 8: //ADDI
 			{
 				strcat(result, "ADDI ");
 				strcat(result, decToReg(binToDec(rt)));
 				strcat(result, ", ");
 				strcat(result, decToReg(binToDec(rs)));
-				sprintf(hex, "0x%X", longBinToDec(imm));
+				strcat(result, ", ");
+				sprintf(hex, "%d", longBinToDec(imm));
 				strcat(result, hex);
 				return result;
 			}
-			case 001001: //ADDIU
+			case 9: //ADDIU
 			{
-
+				strcat(result, "ADDIU ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				sprintf(hex, "%d", longBinToDec(imm));
+				strcat(result, hex);
+				return result;
 			}
-			case 001100: //ANDI
+			case 12: //ANDI
 			{
-
+				strcat(result, "ANDI ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				sprintf(hex, "%d", longBinToDec(imm));
+				strcat(result, hex);
+				return result;
 			}
-			case 001101: //ORI
+			case 13: //ORI
 			{
-
+				strcat(result, "ORI ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				sprintf(hex, "%d", longBinToDec(imm));
+				strcat(result, hex);
+				return result;
 			}
-			case 001110: //XORI
+			case 14: //XORI
 			{
-
+				strcat(result, "XORI ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				sprintf(hex, "%d", longBinToDec(imm));
+				strcat(result, hex);
+				return result;
 			}
-			case 001010: //SLTI
+			case 10: //SLTI
 			{
-
+				strcat(result, "SLTI ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				sprintf(hex, "%d", longBinToDec(imm));
+				strcat(result, hex);
+				return result;
 			}
-			case 100011: //LW
+			case 35: //LW
 			{
-
+				strcat(result, "LW ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				sprintf(hex, "%d(", longBinToDec(imm));
+				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				strcat(result, hex);
+				return result;
 			}
-			case 100000: //LB
+			case 16: //LB
 			{
-
+				strcat(result, "LB ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				sprintf(hex, "%d(", longBinToDec(imm));
+				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				strcat(result, hex);
+				return result;
 			}
-			case 100001: //LH
+			case 17: //LH
 			{
-
+				strcat(result, "LH ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				sprintf(hex, "%d(", longBinToDec(imm));
+				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				strcat(result, hex);
+				return result;
 			}
-			case 001111: //LUI
+			case 15: //LUI
 			{
-
+				strcat(result, "LUI ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				sprintf(hex, "%d", longBinToDec(imm));
+				strcat(result, hex);
+				return result;
 			}
-			case 101011: //SW
+			case 43: //SW
 			{
-
+				strcat(result, "SW ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				sprintf(hex, "%d(", longBinToDec(imm));
+				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				strcat(result, hex);
+				return result;
 			}
-			case 101000: //SB
+			case 40: //SB
 			{
-
+				strcat(result, "SB ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				sprintf(hex, "%d(", longBinToDec(imm));
+				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				strcat(result, hex);
+				return result;
 			}
-			case 101001: //SH
+			case 41: //SH
 			{
-
+				strcat(result, "SH ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				sprintf(hex, "%d(", longBinToDec(imm));
+				sprintf(hex, "%s)", decToReg(binToDec(rs)));
+				strcat(result, hex);
+				return result;
 			}
-			case 000100: //BEQ
+			case 4: //BEQ
 			{
-
+				strcat(result, "BEQ ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				sprintf(hex, "%d", longBinToDec(imm));
+				strcat(result, hex);
+				return result;
 			}
-			case 000101: //BNE
+			case 5: //BNE
 			{
-
+				strcat(result, "BNE ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				strcat(result, decToReg(binToDec(rt)));
+				strcat(result, ", ");
+				sprintf(hex, "%d", longBinToDec(imm));
+				strcat(result, hex);
+				return result;
 			}
-			case 000110: //BLEZ
+			case 6: //BLEZ
 			{
-
+				strcat(result, "BLEZ ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				sprintf(hex, "%d", longBinToDec(imm));
+				strcat(result, hex);
+				return result;
 			}
-			case 000111: //BGTZ
+			case 7: //BGTZ
 			{
-
+				strcat(result, "BGTZ ");
+				strcat(result, decToReg(binToDec(rs)));
+				strcat(result, ", ");
+				sprintf(hex, "%d", longBinToDec(imm));
+				strcat(result, hex);
+				return result;
 			}
-			case 000010: //J
+			case 2: //J
 			{
-
+				strcat(result, "J ");
+				sprintf(hex, " 0x%X", longBinToDec(target));
+				strcat(result, hex);
+				return result;
 			}
-			case 000011: //JAL
+			case 3: //JAL
 			{
-
+				strcat(result, "JAL ");
+				sprintf(hex, " 0x%X", longBinToDec(target));
+				strcat(result, hex);
+				return result;
 			}
 			default: 
-				printf("Error: An R-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
-				return 1000;
+				return "ERROR INSTRUCTION NOT FOUND";
 		}	
 }
 const char* decToReg(int value)
