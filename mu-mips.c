@@ -605,19 +605,56 @@ void handleItype(const char* bits)
 				mem_write_32(temp, CURRENT_STATE.REGS[binToDec(rt)]);
 				break;
 			}
-			/*
 			case 101000: //SB
-				return 40;
+			{				
+				NEXT_STATE.REGS[binToDec(rs)] =  CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)((int16_t)longBinToDec(imm));
+				mem_write_32(NEXT_STATE.REGS[binToDec(rs)], CURRENT_STATE.REGS[binToDec(rt)] & 0x000000FF);
+				break;
+			}
 			case 101001: //SH
-				return 41;
+				{
+				NEXT_STATE.REGS[binToDec(rs)] =  CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)((int16_t)longBinToDec(imm));
+				mem_write_32(NEXT_STATE.REGS[binToDec(rs)], CURRENT_STATE.REGS[binToDec(rt)] & 0x0000FFFF);
+				break;
+
+				}
 			case 000100: //BEQ
-				return 4;
+			{
+				if (CURRENT_STATE.REGS[binToDec(rs)] == CURRENT_STATE.REGS[binToDec(rt)]){
+					NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
+
+				}
+				
+				break;
+			}
+				
 			case 000101: //BNE
-				return 5;
+			{
+				if (CURRENT_STATE.REGS[binToDec(rs)] != CURRENT_STATE.REGS[binToDec(rt)]){
+					NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
+
+				}
+				
+				break;
+			}	
 			case 000110: //BLEZ
-				return 6;
+				{
+				if (CURRENT_STATE.REGS[binToDec(rs)] == 0){
+					NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
+
+				}
+				
+				break;
+			}
 			case 000111: //BGTZ
-				return 7;
+			{
+				if (CURRENT_STATE.REGS[binToDec(rs)] >= 0){
+					NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
+
+				}
+				
+				break;
+			}
 			case 000010: //J
 				return 2;
 			case 000011: //JAL
