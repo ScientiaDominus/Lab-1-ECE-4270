@@ -532,138 +532,134 @@ void handleItype(const char* bits)
 		}
 		imm[i] = bits[i+16]; //convert the immediate address into a string.
 	}
-	opcode = atoi(op);
+	opcode = longBinToDec(op);
 	switch(opcode)
+	{
+		case 8: //ADDI
 		{
-			case 001000: //ADDI
-			{
-				NEXT_STATE.REGS[binToDec(rt)] = (int32_t)CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)longBinToDec(imm);
-				break;
-			}
-			case 001001: //ADDIU
-			{
-				NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)longBinToDec(imm);
-				break;
-			}
-			case 001100: //ANDI
-			{
-				NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] & (uint32_t)longBinToDec(imm);
-				break;
-			}
-			case 001101: //ORI
-			{
-				NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] | (uint32_t)longBinToDec(imm);
-				break;
-			}
-			case 001110: //XORI
-			{
-				NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] ^ (uint32_t)longBinToDec(imm);
-				break;
-			}
-			case 001010: //SLTI
-			{
-				if(CURRENT_STATE.REGS[binToDec(rs)] < (uint32_t)longBinToDec(imm)) //compare the registers. if rs is less than rt than store 1 in rd. otherwise store a 0 in rd.
-				{
-					NEXT_STATE.REGS[binToDec(rt)] = 1;
-					break;
-				}
-				NEXT_STATE.REGS[binToDec(rt)] = 0;
-				break;
-			}
-			case 100011: //LW
-			{
-				int32_t temp = 0;
-				temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
-				NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp);
-				break;
-			}
-			case 100000: //LB
-			{
-				int32_t temp = 0;
-				temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
-				NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp) >> 24;
-				break;
-			}
-			case 100001: //LH
-			{
-				int32_t temp = 0;
-				temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
-				NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp) >> 16;
-				break;
-			}
-			case 001111: //LUI
-			{
-				int32_t temp = 0;
-				temp = ((int32_t)longBinToDec(imm)) << 16;
-				NEXT_STATE.REGS[binToDec(rt)] = temp;
-				break;
-			}
-			case 101011: //SW
-			{
-				uint32_t temp = 0;
-				temp = CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)((int16_t)longBinToDec(imm));
-				mem_write_32(temp, CURRENT_STATE.REGS[binToDec(rt)]);
-				break;
-			}
-			case 101000: //SB
-			{				
-				NEXT_STATE.REGS[binToDec(rs)] =  CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)((int16_t)longBinToDec(imm));
-				mem_write_32(NEXT_STATE.REGS[binToDec(rs)], CURRENT_STATE.REGS[binToDec(rt)] & 0x000000FF);
-				break;
-			}
-			case 101001: //SH
-				{
-				NEXT_STATE.REGS[binToDec(rs)] =  CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)((int16_t)longBinToDec(imm));
-				mem_write_32(NEXT_STATE.REGS[binToDec(rs)], CURRENT_STATE.REGS[binToDec(rt)] & 0x0000FFFF);
-				break;
-
-				}
-			case 000100: //BEQ
-			{
-				if (CURRENT_STATE.REGS[binToDec(rs)] == CURRENT_STATE.REGS[binToDec(rt)]){
-					NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
-
-				}
-				
-				break;
-			}
-				
-			case 000101: //BNE
-			{
-				if (CURRENT_STATE.REGS[binToDec(rs)] != CURRENT_STATE.REGS[binToDec(rt)]){
-					NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
-
-				}
-				
-				break;
-			}	
-			case 000110: //BLEZ
-				{
-				if (CURRENT_STATE.REGS[binToDec(rs)] == 0){
-					NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
-
-				}
-				
-				break;
-			}
-			case 000111: //BGTZ
-			{
-				if (CURRENT_STATE.REGS[binToDec(rs)] >= 0){
-					NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
-
-				}
-				
-				break;
-			}
-			case 000010: //J
-				return 2;
-			case 000011: //JAL
-				return 3;
-			default: 
-				printf("Error: An R-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
-				return 1000;
-			*/
+			NEXT_STATE.REGS[binToDec(rt)] = (int32_t)CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)longBinToDec(imm);
+			break;
 		}
+		case 9: //ADDIU
+		{
+			NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)longBinToDec(imm);
+			break;
+		}
+		case 12: //ANDI
+		{
+			NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] & (uint32_t)longBinToDec(imm);
+			break;
+		}
+		case 13: //ORI
+		{
+			NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] | (uint32_t)longBinToDec(imm);
+			break;
+		}
+		case 14: //XORI
+		{
+			NEXT_STATE.REGS[binToDec(rt)] = CURRENT_STATE.REGS[binToDec(rs)] ^ (uint32_t)longBinToDec(imm);
+			break;
+		}
+		case 10: //SLTI
+		{
+			if(CURRENT_STATE.REGS[binToDec(rs)] < (uint32_t)longBinToDec(imm)) //compare the registers. if rs is less than rt than store 1 in rd. otherwise store a 0 in rd.
+			{
+				NEXT_STATE.REGS[binToDec(rt)] = 1;
+				break;
+			}
+			NEXT_STATE.REGS[binToDec(rt)] = 0;
+			break;
+		}
+		case 35: //LW
+		{
+			int32_t temp = 0;
+			temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
+			NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp);
+			break;
+		}
+		case 32: //LB
+		{
+			int32_t temp = 0;
+			temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
+			NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp) >> 24;
+			break;
+		}
+		case 33: //LH
+		{
+			int32_t temp = 0;
+			temp = CURRENT_STATE.REGS[binToDec(rs)] + (int32_t)((int16_t)longBinToDec(imm));
+			NEXT_STATE.REGS[binToDec(rt)] = mem_read_32(temp) >> 16;
+			break;
+		}
+		case 15: //LUI
+		{
+			int32_t temp = 0;
+			temp = ((int32_t)longBinToDec(imm)) << 16;
+			NEXT_STATE.REGS[binToDec(rt)] = temp;
+			break;
+		}
+		case 43: //SW
+		{
+			uint32_t temp = 0;
+			temp = CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)((int16_t)longBinToDec(imm));
+			mem_write_32(temp, CURRENT_STATE.REGS[binToDec(rt)]);
+			break;
+		}
+		case 40: //SB
+		{				
+			NEXT_STATE.REGS[binToDec(rs)] =  CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)((int16_t)longBinToDec(imm));
+			mem_write_32(NEXT_STATE.REGS[binToDec(rs)], CURRENT_STATE.REGS[binToDec(rt)] & 0x000000FF);
+			break;
+		}
+		case 41: //SH
+			{
+			NEXT_STATE.REGS[binToDec(rs)] =  CURRENT_STATE.REGS[binToDec(rs)] + (uint32_t)((int16_t)longBinToDec(imm));
+			mem_write_32(NEXT_STATE.REGS[binToDec(rs)], CURRENT_STATE.REGS[binToDec(rt)] & 0x0000FFFF);
+			break;
+
+			}
+		case 4: //BEQ
+		{
+			if (CURRENT_STATE.REGS[binToDec(rs)] == CURRENT_STATE.REGS[binToDec(rt)]){
+				NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
+
+			}
+			
+			break;
+		}
+			
+		case 5: //BNE
+		{
+			if (CURRENT_STATE.REGS[binToDec(rs)] != CURRENT_STATE.REGS[binToDec(rt)]){
+				NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
+
+			}
+			
+			break;
+		}	
+		case 6: //BLEZ
+			{
+			if (CURRENT_STATE.REGS[binToDec(rs)] == 0){
+				NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
+
+			}
+			
+			break;
+		}
+		case 7: //BGTZ
+		{
+			if (CURRENT_STATE.REGS[binToDec(rs)] >= 0){
+				NEXT_STATE.PC = (uint32_t)((int16_t)longBinToDec(imm)) << 2;
+
+			}
+			
+			break;
+		}
+		case 2: //J
+		case 3: //JAL
+		default: 
+			printf("Error: An R-type instruction with opcode %d does not exist in the MIPS instruction set.\n", opcode);
+	}
 
 }
 //This function handles all R-type instructions using an input binary string and decoding that into integers with the use of the
