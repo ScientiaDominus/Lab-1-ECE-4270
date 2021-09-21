@@ -422,14 +422,14 @@ int main(int argc, char *argv[]) {
 //this function is now working. Previously values resulted in a buffer overflow but that issue has been resolved. 
 const char* binaryMips(uint32_t input)
 {
-	char hexString[10] = {}; //create a string to store the hexadecimal form
+	char hexString[9] = {}; //create a string to store the hexadecimal form
 	char *binString;
 	binString = (char *)malloc(33*sizeof(char)); //a string to contain the binary representation
 	int i = 0;
 	//printf("\n%X\n", input);
 	//printf("Hey jude\n");
-	sprintf(hexString, "%X", input); //store the hex into the string
-	//printf("%s", hexString); //test for the correct string 
+	sprintf(hexString, "%08X", (uint32_t)input); //store the hex into the string
+	//printf("\nhexString is %s\n", hexString); //test for the correct string 
 	for(i = 0; i < 8; i++) //convert the hex into binary values
 	{
 		switch (hexString[i]) //check the character and convert to a 4-bit binary representation.
@@ -484,6 +484,7 @@ const char* binaryMips(uint32_t input)
 				break;
 		}
 	}
+	//printf("\nbinString is %s\n", binString);
 	return binString;
 }
 /*const char* instMips(char *input)
@@ -1180,7 +1181,7 @@ const char* iTypeString(const char* bits)
 				strcat(result, ", ");
 				strcat(result, decToReg(binToDec(rs)));
 				strcat(result, ", ");
-				sprintf(hex, "%d", longBinToDec(imm));
+				sprintf(hex, "%X", longBinToDec(imm));
 				strcat(result, hex);
 				return result;
 			}
@@ -1191,7 +1192,7 @@ const char* iTypeString(const char* bits)
 				strcat(result, ", ");
 				strcat(result, decToReg(binToDec(rs)));
 				strcat(result, ", ");
-				sprintf(hex, "%d", longBinToDec(imm));
+				sprintf(hex, "%X", longBinToDec(imm));
 				strcat(result, hex);
 				return result;
 			}
@@ -1202,7 +1203,7 @@ const char* iTypeString(const char* bits)
 				strcat(result, ", ");
 				strcat(result, decToReg(binToDec(rs)));
 				strcat(result, ", ");
-				sprintf(hex, "%d", longBinToDec(imm));
+				sprintf(hex, "%X", longBinToDec(imm));
 				strcat(result, hex);
 				return result;
 			}
@@ -1213,7 +1214,7 @@ const char* iTypeString(const char* bits)
 				strcat(result, ", ");
 				strcat(result, decToReg(binToDec(rs)));
 				strcat(result, ", ");
-				sprintf(hex, "%d", longBinToDec(imm));
+				sprintf(hex, "%X", longBinToDec(imm));
 				strcat(result, hex);
 				return result;
 			}
@@ -1224,7 +1225,7 @@ const char* iTypeString(const char* bits)
 				strcat(result, ", ");
 				strcat(result, decToReg(binToDec(rs)));
 				strcat(result, ", ");
-				sprintf(hex, "%d", longBinToDec(imm));
+				sprintf(hex, "%X", longBinToDec(imm));
 				strcat(result, hex);
 				return result;
 			}
@@ -1235,7 +1236,7 @@ const char* iTypeString(const char* bits)
 				strcat(result, ", ");
 				strcat(result, decToReg(binToDec(rs)));
 				strcat(result, ", ");
-				sprintf(hex, "%d", longBinToDec(imm));
+				sprintf(hex, "%X", longBinToDec(imm));
 				strcat(result, hex);
 				return result;
 			}
